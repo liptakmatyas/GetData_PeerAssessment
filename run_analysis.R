@@ -74,8 +74,8 @@ getColumnsOfInterest <- function(columnNames) {
          x          = columnNames)
 }
 
-#   keep only the columnsOfInterest from the measurement variables,
-#   Load all six pieces of the original data set,
+#   Keep only the columnsOfInterest from the measurement variables,
+#   load all six pieces of the original data set,
 #   merge the six pieces together,
 #   and return the result.
 loadFilterAndMerge <- function(columnsOfInterest) {
@@ -106,8 +106,8 @@ addLabels <- function(dataset, columnNames, activityLabels) {
     
     dataset
 }
-#   Create the tidy base data set by loading, filtering, merging and labeling
-#   the original data set
+#   Create the tidy base data set by
+#   loading, filtering, merging and labeling the original data set
 createTidyBaseDataSet <- function() {
     allColumnNames      <- loadColumnNames()
     columnsOfInterest   <- getColumnsOfInterest(allColumnNames)
@@ -117,7 +117,7 @@ createTidyBaseDataSet <- function() {
               loadActivityLabels())
 }
 
-#   Calculate the averages per variable per subject in the data set
+#   Calculate the final solution
 calculateAverages <- function(dataset) {
     cat("Calculating averages ...")
     moltenData  <- melt(dataset,
@@ -156,3 +156,4 @@ runAnalysis <- function() {
 }
 
 HAR.averages <- runAnalysis()
+

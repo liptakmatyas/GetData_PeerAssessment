@@ -14,7 +14,8 @@ from the article
 _Human Activity Recognition on Smartphones
 using a Multiclass Hardware-Friendly Support Vector Machine_ by
 Davide Anguita, Alessandro Ghio, Luca Oneto,
-Xavier Parra and Jorge L. Reyes-Ortiz [1]
+Xavier Parra and Jorge L. Reyes-Ortiz
+(see _Reference 1._)
 
 The main goal of the project is to perform basic data obtaining and cleaning
 tasks by creating a scirpt (`run_analysis.R`) that
