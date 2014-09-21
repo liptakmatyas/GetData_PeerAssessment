@@ -29,6 +29,10 @@ tasks by creating a scirpt (`run_analysis.R`) that
     with the average of each variable for each activity and each subject
     (`averages.txt`).
 
+The analysis script expects the original data set to be located in the same
+directory as `run_analysis.R` itself, with the file name `UCI_HAR_Dataset.zip`.
+If the file is not available, the script can download it.
+
 
 Files in this repository
 ------------------------
