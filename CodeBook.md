@@ -41,7 +41,9 @@ Structure of the data set
 The data set in `averages.txt` contains 4 variables:
 
 *   `Subject`:
-    The integer label of the subject.
+    The integer label of the subject. The subjects of the study were
+    anonymized, so instead of their name they are identified by integer
+    numbers. These are category labels without any numerical meaning.
 *   `Activity`:
     One of the string labels from the `activity_labels.txt` file in the
     original archive indicating the type of activity:
@@ -67,29 +69,29 @@ The interpretation of the measurement variable names is based on their
 components:
 
 *   The first character of the name of the variable is the _domain_:
-    *   `f` -- in the frequency domain
-    *   `t` -- in the time domain
+    *   `f` -- "in the frequency domain"
+    *   `t` -- "in the time domain"
 *   Next comes the _signal_:
-    *   `BodyAcc`       -- body linear acceleration
-    *   `BodyGyro`      -- body angular velocity
-    *   `GravityAcc`    -- gravity linear acceleration
+    *   `BodyAcc`       -- "body linear acceleration"
+    *   `BodyGyro`      -- "body angular velocity"
+    *   `GravityAcc`    -- "gravity linear acceleration"
 *   After the signal there can be optional _derived value_:
-    *   `Jerk`  -- jerk
-    *   `Mag`   -- magnitude
+    *   `Jerk`  -- "jerk"
+    *   `Mag`   -- "magnitude"
 *   Because we are only interested in columns that contain summarized values,
     the column label will contain one of these _summary functions_,
     configured in the `HARDataSet.columnNames.pattern` configuration variable:
-    *   `-mean()`   -- Mean of the
-    *   `-std()`    -- Standard deviation of the
+    *   `-mean()`   -- "Mean of the"
+    *   `-std()`    -- "Standard deviation of the"
 *   Finally, the variable name can optionally end in an _axis_:
-    *   `-X` -- on the X axis
-    *   `-Y` -- on the Y axis
-    *   `-Z` -- on the Z axis
+    *   `-X` -- "on the X axis"
+    *   `-Y` -- "on the Y axis"
+    *   `-Z` -- "on the Z axis"
 
 **NOTE:**
-There are some variable names which contain `BodyBody` in their _signal_
-component. These are treated as containing only `Body`, i.e. the repetition is
-removed.
+There are some variable names which contain "`BodyBody`" in their _signal_
+component. These are treated as containing only "`Body`", i.e. the repetition
+is removed.
 
 Then, these parts are assembled in the following order:
 
@@ -132,17 +134,18 @@ Relevant configuration variables:
 
 ### Columns of interest
 
-Instead of hard-coding the list of columns that contain the relevan mean and
+Instead of hard-coding the list of columns that contain the relevant mean and
 standard deviation values, we will utilize the metadata that is available in
 the original archive and hard-code only the high-level infomation contained in
 the code book of the original data set, `features_info.txt`.
 
 The values we're interested in are stored in columns having "`-mean()`" or
 "`-std()`" in their names. The parenthesis are important, otherwise some
-unwanted columns end up in our tidy data set, e.g. `-meanFreq()`. The
-`features.txt` file in the original archive contains the mapping between the
-column numbers and names. This text file contains one mapping per line, where
-the column number and the column name are separated by a single space.
+unwanted columns end up in our tidy data set, e.g. the ones with
+"`meanFreq`" in their name. The `features.txt` file in the original archive
+contains the mapping between the column numbers and names. This text file
+contains one mapping per line, where the column number and the column name are
+separated by a single space.
 
 The `loadColumnNames` function loads this mapping and returns a simple vector
 of the column names, where the index of a column name is its index in the data
@@ -151,7 +154,7 @@ sets.
 The `getColumnsOfInterest` function returns a vector of column numbers that
 correspond to the complete list of columns that we are interested in our
 analysis. This list will be the result of filtering the names of the columns
-for the configured patterns, i.e. `-mean()` or `-std()`, and returning the
+for the configured patterns, i.e. "`-mean()`" or "`-std()`", and returning the
 indices of the matching columns. The returned list can be used to index the
 columns of the original data set to narrow it down to only the part to be
 analyzed.
@@ -194,7 +197,7 @@ together the following way:
 
 <pre>
      Subject | Activity | tBodyAcc-mean()-X | ... | fBodyBodyGyroJerkMag-std() 
-    ---------+----------+-------------------+-...-+----------------------------
+    ===========================================================================
         .    |     .    |                      .
         .    |     .    |                      .
         .    |     .    |                      .
@@ -231,21 +234,21 @@ Relevant configuration variables:
 
 ### Labeling the data sets
 
-The `addLabels` function takes a merged data set and returns the same data set
-after assigning descriptive labels to its components:
-
-*   The first column gets the label `Subject`.
-*   The second column gets the label `Activity`.
-*   The measurement variables (i.e. columns 3+) will be labelled with the
-    descriptive variable names based on the ones used in the original data set.
-*   The activities in the second column of each row will be represented by
-    their human-readable labels.
-
 #### Variable names
 
-The `variableNames` function performs the assignment of the descriptive
-variable names by fixing the repetative `BodyBody` substrings in some of the
-variable names by replacing them with a single occurence of `Body`.
+The `addLabels` function takes a merged data set and returns the same data set
+after assigning descriptive labels to its columns:
+
+*   The first column gets the label "`Subject`".
+*   The second column gets the label "`Activity`".
+*   The measurement variables (i.e. columns 3 and above) will be labelled with
+    the descriptive variable names based on the ones used in the original data
+    set by transforming the received `columnNames` using the `variableNames`
+    function.
+
+**NOTE**:
+The `variableNames` function replaces the occurences of "`BodyBody`" substrings
+in some of the variable names with a single occurence of "`Body`", if any.
 
 #### Activity labels
 
@@ -260,6 +263,10 @@ The `loadActivityLabels` function loads this mapping and returns a simple
 vector of the textual labels, where the index of the label is its numerical
 representation in the data sets.
 
+The `addLabel` function replaces the integer values in the `Activity` column
+with their string representation, as specified in this `activity_labels.txt`
+file via its `activityLabels` parameter.
+
 Relevant configuration variables:
 
 *   `HARDataSet.activityLabels.fn`
@@ -267,17 +274,22 @@ Relevant configuration variables:
 
 ### Calculating the averages
 
-The `calculateAverages` function first melts the merged data set based on the
-two levels of subjects and activities, then it summarizes the melted data
-for each variable for each activity for each subject by calculating the `mean`
-using the `ddply` function.
+The `calculateAverages` function calculates the final result of the project:
+
+1.  It melts the merged data set based on the two levels of `Subject` and
+    `Activity` using the `melt` function (from package `reshape2`).
+2.  It then summarizes the molten data for each `Subject` for each `Activity`
+    for each `Variable` by calculating the `mean` using the `ddply` function
+    (from package `plyr`).
 
 
 ### Saving the result
 
 The final output of the project is a tidy data file with the average of each
 variable for each activity and each subject. The `saveResult` function saves
-the received data set in a plain text file using the `write.table` function.
+the received data set as a plain text file using the `write.table` function.
+
+The results are saved to `averages.txt`.
 
 Relevant configuration variables:
 
@@ -296,4 +308,3 @@ References
 [1]: http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones "Human Activity Recognition Using Smartphones Data Set"
 [2]: https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip "Human Activity Recognition Using Smartphones Data Set / Coursera copy"
 [3]: http://en.wikipedia.org/wiki/Zip_(file_format) "Zip (file format) / Wikipedia"
-

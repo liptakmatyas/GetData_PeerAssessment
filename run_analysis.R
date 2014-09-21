@@ -74,8 +74,8 @@ getColumnsOfInterest <- function(columnNames) {
          x          = columnNames)
 }
 
-#   Load all six pieces of the original data set,
 #   keep only the columnsOfInterest from the measurement variables,
+#   Load all six pieces of the original data set,
 #   merge the six pieces together,
 #   and return the result.
 loadFilterAndMerge <- function(columnsOfInterest) {
@@ -119,33 +119,40 @@ createTidyBaseDataSet <- function() {
 
 #   Calculate the averages per variable per subject in the data set
 calculateAverages <- function(dataset) {
+    cat("Calculating averages ...")
     moltenData  <- melt(dataset,
                         id.vars         = c("Subject", "Activity"),
                         variable.name   = "Variable",
                         value.name      = "Value")
+    avg <- ddply(moltenData,
+                 .(Subject, Activity, Variable),
+                 summarize,
+                 Average = mean(Value))
+    cat(" DONE\n")
     
-    ddply(moltenData,
-          .(Subject, Activity, Variable),
-          summarize,
-          Average = mean(Value))
+    avg
 }
 
 #   Save the data set as the final result
 saveResult <- function(result) {
+    cat(sprintf("Saving result to %s ...", HARDataSet.averages.fn))
     write.table(result, HARDataSet.averages.fn, row.names = FALSE)
+    cat(" DONE\n")
 }
 
 
+#   Run the analysis:
 #
-#   MAIN
-#
+#   1.  Download the original .zip archive if we do not have it yet
+#   2.  Assemble our tidy base data set
+#   3.  Calculate and save the averages
+runAnalysis <- function() {
+    downloadDataSetArchive()
+    baseData <- createTidyBaseDataSet()
+    averages <- calculateAverages(baseData)
+    saveResult(averages)
 
-#   Download the original .zip archive if we do not have it yet
-downloadDataSetArchive()
+    averages
+}
 
-#   Assemble our tidy base data set
-baseData <- createTidyBaseDataSet()
-
-#   Calculate and save the averages
-averages <- calculateAverages(baseData)
-saveResult(averages)
+HAR.averages <- runAnalysis()
